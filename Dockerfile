@@ -10,6 +10,12 @@ RUN /tmp/setup/php-extensions.sh
 RUN /tmp/setup/oci8-extension.sh
 ENV LD_LIBRARY_PATH /usr/local/instantclient
 
+# @see https://gist.github.com/chadrien/c90927ec2d160ffea9c4
+RUN yes | pecl install xdebug \
+    && echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.remote_enable=on" >> /usr/local/etc/php/conf.d/xdebug.ini \
+    && echo "xdebug.remote_autostart=off" >> /usr/local/etc/php/conf.d/xdebug.ini
+
 RUN mkdir /var/www/moodledata && chown www-data /var/www/moodledata && \
     mkdir /var/www/phpunitdata && chown www-data /var/www/phpunitdata && \
     mkdir /var/www/behatdata && chown www-data /var/www/behatdata && \

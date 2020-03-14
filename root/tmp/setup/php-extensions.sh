@@ -4,6 +4,20 @@ set -e
 
 echo "Installing apt dependencies"
 
+# TODO: is this a safe assumption, that the PHP Ini files won't change?
+ini_folder="/usr/local/etc/php" 
+ini_dev_file="${ini_folder}/php.ini-development"
+ini_file="${ini_folder}/php.ini"
+
+# TODO: Figure out if there is there any reason NOT to create/link a php.ini file?
+# 		As of PHP 7 the regular php.ini file was removed, add it back in (assume this is a dev image)
+#
+# 		cp ${ini_dev_file} "${ ini_folder }/php.ini"
+ln -s $ini_dev_file $ini_file
+
+#configure Pear (avoid the 'configuration option "php_ini" is not set to php.ini location' error )
+pecl config-set php_ini $ini_file
+
 # Build packages will be added during the build, but will be removed at the end.
 BUILD_PACKAGES="gettext gnupg libcurl4-openssl-dev libfreetype6-dev libicu-dev libjpeg62-turbo-dev \
   libldap2-dev libmariadbclient-dev libmemcached-dev libpng-dev libpq-dev libxml2-dev libxslt-dev \
@@ -58,8 +72,8 @@ docker-php-ext-install -j$(nproc) gd
 docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/
 docker-php-ext-install -j$(nproc) ldap
 
-# Memcached, MongoDB, Redis, APCu, igbinary.
-pecl install memcached mongodb redis apcu igbinary uuid
+# Memcached, MongoDB, Redis, APCu, igbinary, xdebug.
+pecl install memcached mongodb redis apcu igbinary uuid 
 docker-php-ext-enable memcached mongodb redis apcu igbinary uuid
 
 # ZIP
